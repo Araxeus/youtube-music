@@ -1,10 +1,34 @@
 const {injectCSS} = require('../utils');
 const {Menu , app} = require('electron');
+const { existsSync } = require("fs");
 const path = require('path');
 const electronLocalshortcut = require("electron-localshortcut");
 const is = require('electron-is');
 const {getAllPlugins} = require('../../plugins/utils');
 const config = require('../../config');
+
+const pluginEnabledMenu = (plugin, label = "") => ({
+	label: label || plugin,
+	type: "checkbox",
+	checked: config.plugins.isEnabled(plugin),
+	click: (item) => {
+		if (item.checked) {
+			config.plugins.enable(plugin);
+		} else {
+			config.plugins.disable(plugin);
+		}
+		checkCheckbox(item);
+	},
+});
+
+var enabled = !config.get('options.hideMenu');
+
+//override Menu.setApplicationMenu to also point to also refresh custom menu
+const setMenu = Menu.setApplicationMenu;
+Menu.setApplicationMenu = function (menu) {
+	setMenu.apply(Menu,menu)
+	win.webContents.send('updateMenu', true);
+}
 
 module.exports = win => {
 	// css for custom scrollbar + disable drag area(was causing bugs)
@@ -13,12 +37,12 @@ module.exports = win => {
 		//build new menu
 		const template = mainMenuTemplate(win)
 		const menu = Menu.buildFromTemplate(template);
-		Menu.setApplicationMenu(menu);
+		setMenu(menu);
 
 		//register keyboard shortcut && hide menu if hideMenu is enabled
 		if (config.get('options.hideMenu')) {
 			win.webContents.send('updateMenu', false); 
-			var enabled=  false;
+			 var enabled=  false;
 			electronLocalshortcut.register(win, 'Esc', () => {
 				if(enabled) {
 					win.webContents.send('updateMenu', false); 
@@ -42,21 +66,27 @@ const mainMenuTemplate = win => [
 		label: 'Plugins',
 		submenu: [
 			...getAllPlugins().map(plugin => {
-				return {
-					label: plugin,
-					type: 'checkbox',
-					checked: config.plugins.isEnabled(plugin),
-					click: item => {
-						// CheckCheckbox(item);
-						if (item.checked) {
-							config.plugins.enable(plugin);
-						} else {
-							config.plugins.disable(plugin);
-						}
+				const pluginPath = path.join(path.dirname(path.dirname(__dirname))
+					, "plugins", plugin, "menu.js");
+				
+				if (!config.plugins.isEnabled(plugin)) {
+					return pluginEnabledMenu(plugin);
+				}
+				if (existsSync(pluginPath)) {
+					console.log("alert in");
+					const getPluginMenu = require(pluginPath);
+					return {
+						label: plugin,
+						submenu: [
+							pluginEnabledMenu(plugin, "Enabled"),
+							...getPluginMenu(win, config.plugins.getOptions(plugin), () =>
+								module.exports.setApplicationMenu(win)
+							),
+						],
+					};
+				}
 
-						checkCheckbox(item);
-					}
-				};
+				return pluginEnabledMenu(plugin);
 			}),
 			{type: 'separator'},
 			{
@@ -142,6 +172,50 @@ const mainMenuTemplate = win => [
 					}
 				] :
 				[]),
+				{
+					label: 'Tray',
+					submenu: [
+						{
+							label: 'Disabled',
+							type: 'radio',
+							checked: !config.get('options.tray'),
+							click: () => {
+								config.set('options.tray', false);
+								config.set('options.appVisible', true);
+							}
+						},
+						{
+							label: 'Enabled + app visible',
+							type: 'radio',
+							checked:
+								config.get('options.tray') && config.get('options.appVisible'),
+							click: () => {
+								config.set('options.tray', true);
+								config.set('options.appVisible', true);
+							}
+						},
+						{
+							label: 'Enabled + app hidden',
+							type: 'radio',
+							checked:
+								config.get('options.tray') && !config.get('options.appVisible'),
+							click: () => {
+								config.set('options.tray', true);
+								config.set('options.appVisible', false);
+							}
+						},
+						{type: 'separator'},
+						{
+							label: 'Play/Pause on click',
+							type: 'checkbox',
+							checked: config.get('options.trayClickPlayPause'),
+							click: item => {
+								config.set('options.trayClickPlayPause', item.checked);
+								checkCheckbox(item);
+							}
+						}
+					]
+				},
 
 			{type: 'separator'},
 			{
@@ -161,50 +235,6 @@ const mainMenuTemplate = win => [
 				label: 'Advanced options',
 				click: () => {
 					config.edit();
-				}
-			}
-		]
-	},
-	{
-		label: 'Tray',
-		submenu: [
-			{
-				label: 'Disabled',
-				type: 'radio',
-				checked: !config.get('options.tray'),
-				click: () => {
-					config.set('options.tray', false);
-					config.set('options.appVisible', true);
-				}
-			},
-			{
-				label: 'Enabled + app visible',
-				type: 'radio',
-				checked:
-					config.get('options.tray') && config.get('options.appVisible'),
-				click: () => {
-					config.set('options.tray', true);
-					config.set('options.appVisible', true);
-				}
-			},
-			{
-				label: 'Enabled + app hidden',
-				type: 'radio',
-				checked:
-					config.get('options.tray') && !config.get('options.appVisible'),
-				click: () => {
-					config.set('options.tray', true);
-					config.set('options.appVisible', false);
-				}
-			},
-			{type: 'separator'},
-			{
-				label: 'Play/Pause on click',
-				type: 'checkbox',
-				checked: config.get('options.trayClickPlayPause'),
-				click: item => {
-					config.set('options.trayClickPlayPause', item.checked);
-					checkCheckbox(item);
 				}
 			}
 		]
