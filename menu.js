@@ -7,7 +7,7 @@ const is = require("electron-is");
 const { getAllPlugins } = require("./plugins/utils");
 const config = require("./config");
 
-const pluginEnabledMenu = (win, plugin, label = "", hasSubmenu=false) => ({
+const pluginEnabledMenu = (win, plugin, label = "", hasSubmenu = false) => ({
 	label: label || plugin,
 	type: "checkbox",
 	checked: config.plugins.isEnabled(plugin),
@@ -17,18 +17,13 @@ const pluginEnabledMenu = (win, plugin, label = "", hasSubmenu=false) => ({
 		} else {
 			config.plugins.disable(plugin);
 		}
-		if(hasSubmenu) {
+		if (hasSubmenu) {
 			this.setApplicationMenu(win);
 		}
 	},
 });
 
-const mainMenuTemplate = (
-	win,
-	withRoles = true,
-	isTray = false,
-	clickCb = () => {}
-) => [
+const mainMenuTemplate = (win, withRoles = true, isTray = false) => [
 	{
 		label: "Plugins",
 		submenu: [
@@ -39,6 +34,7 @@ const mainMenuTemplate = (
 					if (!config.plugins.isEnabled(plugin)) {
 						return pluginEnabledMenu(win, plugin, "", true);
 					}
+
 					const getPluginMenu = require(pluginPath);
 					return {
 						label: plugin,
@@ -71,7 +67,6 @@ const mainMenuTemplate = (
 				checked: config.get("options.autoUpdates"),
 				click: (item) => {
 					config.set("options.autoUpdates", item.checked);
-					clickCb(item);
 				},
 			},
 			{
@@ -80,7 +75,6 @@ const mainMenuTemplate = (
 				checked: config.get("options.disableHardwareAcceleration"),
 				click: (item) => {
 					config.set("options.disableHardwareAcceleration", item.checked);
-					clickCb(item);
 				},
 			},
 			{
@@ -89,7 +83,6 @@ const mainMenuTemplate = (
 				checked: config.get("options.restartOnConfigChanges"),
 				click: (item) => {
 					config.set("options.restartOnConfigChanges", item.checked);
-					clickCb(item);
 				},
 			},
 			{
@@ -98,7 +91,6 @@ const mainMenuTemplate = (
 				checked: config.get("options.autoResetAppCache"),
 				click: (item) => {
 					config.set("options.autoResetAppCache", item.checked);
-					clickCb(item);
 				},
 			},
 			{
@@ -107,7 +99,6 @@ const mainMenuTemplate = (
 				checked: config.get("options.resumeOnStart"),
 				click: (item) => {
 					config.set("options.resumeOnStart", item.checked);
-					clickCb(item);
 				},
 			},
 			...(is.windows() || is.linux()
@@ -118,7 +109,6 @@ const mainMenuTemplate = (
 							checked: config.get("options.hideMenu"),
 							click: (item) => {
 								config.set("options.hideMenu", item.checked);
-								clickCb(item);
 							},
 						},
 				  ]
@@ -133,7 +123,6 @@ const mainMenuTemplate = (
 							checked: config.get("options.startAtLogin"),
 							click: (item) => {
 								config.set("options.startAtLogin", item.checked);
-								clickCb(item);
 							},
 						},
 				  ]
@@ -148,7 +137,6 @@ const mainMenuTemplate = (
 						click: () => {
 							config.set("options.tray", false);
 							config.set("options.appVisible", true);
-							clickCb(item);
 						},
 					},
 					{
@@ -159,7 +147,6 @@ const mainMenuTemplate = (
 						click: () => {
 							config.set("options.tray", true);
 							config.set("options.appVisible", true);
-							clickCb(item);
 						},
 					},
 					{
@@ -170,7 +157,6 @@ const mainMenuTemplate = (
 						click: () => {
 							config.set("options.tray", true);
 							config.set("options.appVisible", false);
-							clickCb(item);
 						},
 					},
 					{ type: "separator" },
@@ -180,7 +166,6 @@ const mainMenuTemplate = (
 						checked: config.get("options.trayClickPlayPause"),
 						click: (item) => {
 							config.set("options.trayClickPlayPause", item.checked);
-							clickCb(item);
 						},
 					},
 				],
