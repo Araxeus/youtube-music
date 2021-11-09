@@ -10,6 +10,20 @@ module.exports.seek = function seek(o) {
 
 module.exports.setupSongControls = () => {
 	ipcRenderer.on("seekTo", async (_, t) => seekTo(t));
+    ipcRenderer.on("seek", async (_, t) => seek(t));
+    ipcRenderer.once("registerOnSeek", registerOnSeek)
 };
 
+async function registerOnSeek() {
+    const register = v => v.addEventListener('seeked', () => ipcRenderer.send('seek', v.currentTime));
+    let video =  document.querySelector('video');
+    if (video) {
+        register(video);
+    }
+    else {
+        document.addEventListener('apiLoaded', () => {
+            register(document.querySelector('video'))
+        }, { once: true, passive: true })
+    }
+}
 

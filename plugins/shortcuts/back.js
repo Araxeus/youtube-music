@@ -1,4 +1,4 @@
-const { globalShortcut } = require("electron");
+const { globalShortcut, ipcRenderer } = require("electron");
 const is = require("electron-is");
 const electronLocalshortcut = require("electron-localshortcut");
 const getSongControls = require("../../providers/song-controls");
@@ -32,11 +32,15 @@ function registerShortcuts(win, options) {
 
 	if (is.linux()) {
 		try {
-			const toMicro = n => n * 1000 * 1000;
-			const seekTo = t => win.webContents.send("seekTo", toMicro(t));
-			const seek = o => win.webContents.send("seek", toMicro(o));
+			const secToMicro = n => n * 1000 * 1000;
+			const seekTo = t => win.webContents.send("seekTo", secToMicro(t));
+			const seek = o => win.webContents.send("seek", secToMicro(o));
 
 			const mprisPlayer = setupMPRIS();
+
+			win.webContents.send("registerOnSeek");
+
+			ipcRenderer.on('seeked', (_, t) => mprisPlayer.seeked(secToMicro(t)))
 
 			mprisPlayer.on("raise", () => {
 				win.setSkipTaskbar(false);
@@ -60,17 +64,18 @@ function registerShortcuts(win, options) {
 			mprisPlayer.on("next", next);
 			mprisPlayer.on("previous", previous);
 
-			player.on('seek', seek);
-			player.on('position', seekTo);
+			mprisPlayer.on('seek', seek);
+			mprisPlayer.on('position', seekTo);
 
 			registerCallback(songInfo => {
 				if (mprisPlayer) {
 					mprisPlayer.metadata = {
-						'mpris:length': toMicro(songInfo.songDuration), // In microseconds
+						'mpris:length': secToMicro(songInfo.songDuration), // In microseconds
 						'mpris:artUrl': songInfo.imageSrc,
 						'xesam:title': songInfo.title,
 						'xesam:artist': songInfo.artist
 					};
+					mprisPlayer.seeked(secToMicro(songInfo.elapsedSeconds));
 					mprisPlayer.playbackStatus = songInfo.isPaused ? "Paused" : "Playing"
 				}
 			})
