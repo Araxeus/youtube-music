@@ -40,9 +40,15 @@ function registerShortcuts(win, options) {
 
 			const mprisPlayer = setupMPRIS();
 
+			const mprisSeek = p => {
+				mprisPlayer.interfaces.player.SetPosition(null, p)
+				mprisPlayer.seeked(p);
+			}
 			win.webContents.send("registerOnSeek");
 
-			ipcMain.on('seeked', (_, t) => mprisPlayer.seeked(secToMicro(t)));
+			ipcMain.on('seeked', (_, t) => 
+				mprisSeek(secToMicro(t)
+			);
 
 			mprisPlayer.getPosition = () => secToMicro(win.webContents.executeJavaScript(`document.querySelector('video').currentTime`))
 
@@ -69,7 +75,7 @@ function registerShortcuts(win, options) {
 			mprisPlayer.on("previous", previous);
 
 			mprisPlayer.on('seek', seek);
-			mprisPlayer.on('position', seekTo);
+			mprisPlayer.on('position', console.log); // seekTo);
 
 			registerCallback(songInfo => {
 				if (mprisPlayer) {
@@ -79,7 +85,7 @@ function registerShortcuts(win, options) {
 						'xesam:title': songInfo.title,
 						'xesam:artist': songInfo.artist
 					};
-					mprisPlayer.seeked(secToMicro(songInfo.elapsedSeconds));
+					mprisSeek(secToMicro(songInfo.elapsedSeconds))
 					mprisPlayer.playbackStatus = songInfo.isPaused ? "Paused" : "Playing"
 				}
 			})
