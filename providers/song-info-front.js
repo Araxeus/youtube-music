@@ -25,5 +25,5 @@ function setupTimeChangeListener() {
 		ipcRenderer.send('timeChanged', mutations[0].target.value);
 		global.songInfo.elapsedSeconds = mutations[0].target.value;
 	});
-	progressObserver.observe($('#progress-bar'), { attributeFilter: ["value"] })
+	progressObserver.observe(document.querySelector('#progress-bar'), { attributeFilter: ["value"] })
 }
