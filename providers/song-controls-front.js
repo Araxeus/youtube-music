@@ -15,7 +15,7 @@ module.exports.setupSongControls = () => {
 };
 
 async function registerOnSeek() {
-    const register = v => v.addEventListener('seeked', () => ipcRenderer.send('seek', v.currentTime));
+    const register = v => v.addEventListener('seeked', () => ipcRenderer.send('seeked', v.currentTime));
     let video =  document.querySelector('video');
     if (video) {
         register(video);
