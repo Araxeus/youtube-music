@@ -46,9 +46,7 @@ function registerShortcuts(win, options) {
 			}
 			win.webContents.send("registerOnSeek");
 
-			ipcMain.on('seeked', (_, t) => 
-				mprisSeek(secToMicro(t)
-			);
+			ipcMain.on('seeked', (_, t) => mprisSeek(secToMicro(t)));
 
 			mprisPlayer.getPosition = () => secToMicro(win.webContents.executeJavaScript(`document.querySelector('video').currentTime`))
 
