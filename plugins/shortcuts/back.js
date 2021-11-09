@@ -83,7 +83,8 @@ function registerShortcuts(win, options) {
 						'mpris:length': secToMicro(songInfo.songDuration), // In microseconds
 						'mpris:artUrl': songInfo.imageSrc,
 						'xesam:title': songInfo.title,
-						'xesam:artist': songInfo.artist
+						'xesam:artist': songInfo.artist,
+						'mpris:trackid': songInfo.videoId
 					};
 					mprisSeek(secToMicro(songInfo.elapsedSeconds))
 					mprisPlayer.playbackStatus = songInfo.isPaused ? "Paused" : "Playing"
