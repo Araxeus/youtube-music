@@ -35,14 +35,18 @@ function registerShortcuts(win, options) {
 			const secToMicro = n => n * 1000 * 1000;
 			const microToSec = n => n / 1000 / 1000;
 
-			const seekTo = e => console.log(e)//win.webContents.send("seekTo", microToSec(e.position));
+			const seekTo = e => win.webContents.send("seekTo", microToSec(e.position));
 			const seek = o => win.webContents.send("seek", microToSec(o));
 
 			const mprisPlayer = setupMPRIS();
 
 			win.webContents.send("registerOnSeek");
 
-			ipcMain.on('seeked', (_, t) => mprisPlayer.seeked(secToMicro(t)))
+			ipcMain.on('seeked', (_, t) => mprisPlayer.seeked(secToMicro(t)));
+
+			mprisPlayer.getPosition = () => win.webContents.executeJavaScript(`
+			   document.querySelector('video').currentTime * 1000 * 1000
+		    `)
 
 			mprisPlayer.on("raise", () => {
 				win.setSkipTaskbar(false);
