@@ -49,7 +49,10 @@ function registerShortcuts(win, options) {
 
 			ipcMain.on('seeked', (_, t) => mprisSeek(secToMicro(t)));
 
-			mprisPlayer.getPosition = () => secToMicro(win.webContents.executeJavaScript(`document.querySelector('video').currentTime`))
+			let currentSeconds = 0;
+			ipcMain.on('timeChanged', (_, t) => currentSeconds = t);
+
+			mprisPlayer.getPosition = () => secToMicro(currentSeconds)
 
 			mprisPlayer.on("raise", () => {
 				win.setSkipTaskbar(false);
