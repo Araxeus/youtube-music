@@ -1,4 +1,4 @@
-const { globalShortcut, ipcRenderer } = require("electron");
+const { globalShortcut, ipcMain } = require("electron");
 const is = require("electron-is");
 const electronLocalshortcut = require("electron-localshortcut");
 const getSongControls = require("../../providers/song-controls");
@@ -40,7 +40,7 @@ function registerShortcuts(win, options) {
 
 			win.webContents.send("registerOnSeek");
 
-			ipcRenderer.on('seeked', (_, t) => mprisPlayer.seeked(secToMicro(t)))
+			ipcMain.on('seeked', (_, t) => mprisPlayer.seeked(secToMicro(t)))
 
 			mprisPlayer.on("raise", () => {
 				win.setSkipTaskbar(false);
