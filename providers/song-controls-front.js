@@ -26,4 +26,3 @@ async function registerOnSeek() {
         }, { once: true, passive: true })
     }
 }
-
