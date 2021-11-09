@@ -32,8 +32,8 @@ function registerShortcuts(win, options) {
 
 	if (is.linux()) {
 		try {
-			const secToMicro = n => n * 1000 * 1000;
-			const microToSec = n => n / 1000 / 1000;
+			const secToMicro = n => Math.round(n * 1000 * 1000);
+			const microToSec = n => Math.round(n / 1000 / 1000);
 
 			const seekTo = e => win.webContents.send("seekTo", microToSec(e.position));
 			const seek = o => win.webContents.send("seek", microToSec(o));
@@ -44,9 +44,7 @@ function registerShortcuts(win, options) {
 
 			ipcMain.on('seeked', (_, t) => mprisPlayer.seeked(secToMicro(t)));
 
-			mprisPlayer.getPosition = () => win.webContents.executeJavaScript(`
-			   document.querySelector('video').currentTime * 1000 * 1000
-		    `)
+			mprisPlayer.getPosition = () => secToMicro(win.webContents.executeJavaScript(`document.querySelector('video').currentTime`))
 
 			mprisPlayer.on("raise", () => {
 				win.setSkipTaskbar(false);
