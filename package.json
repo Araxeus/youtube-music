@@ -85,7 +85,6 @@
 		"node-fetch": "^2.6.2",
 		"node-notifier": "^9.0.1",
 		"ytdl-core": "^4.9.1",
-		"jsbi": "^2.0.5",
 		"ytpl": "^2.2.3"
 	},
 	"devDependencies": {

@@ -4,7 +4,6 @@ const electronLocalshortcut = require("electron-localshortcut");
 const getSongControls = require("../../providers/song-controls");
 const { setupMPRIS } = require("./mpris");
 const registerCallback = require("../../providers/song-info");
-const JSBI = require('jsbi');
 
 function _registerGlobalShortcut(webContents, shortcut, action) {
 	globalShortcut.register(shortcut, () => {
@@ -42,7 +41,6 @@ function registerShortcuts(win, options) {
 			const mprisPlayer = setupMPRIS();
 
 			const mprisSeek = p => {
-				mprisPlayer.interfaces.player.SetPosition(null, JSBI.BigInt(p));
 				mprisPlayer.seeked(p);
 			}
 			win.webContents.send("registerOnSeek");
@@ -77,7 +75,7 @@ function registerShortcuts(win, options) {
 			mprisPlayer.on("previous", previous);
 
 			mprisPlayer.on('seek', seek);
-			mprisPlayer.on('position', console.log); // seekTo);
+			mprisPlayer.on('position', seekTo);
 
 			registerCallback(songInfo => {
 				if (mprisPlayer) {

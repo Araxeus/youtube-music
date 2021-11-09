@@ -1,10 +1,12 @@
 const { ipcRenderer } = require("electron");
 
-module.exports.seekTo = function seekTo(t) {
+module.exports.seekTo = seekTo;
+function seekTo(t) {
     document.querySelector('video').currentTime = t;
 }
 
-module.exports.seek = function seek(o) {
+module.exports.seek = seek;
+function seek(o) {
     document.querySelector('video').currentTime += o;
 }
 
