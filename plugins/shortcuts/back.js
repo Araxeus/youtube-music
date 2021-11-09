@@ -35,7 +35,7 @@ function registerShortcuts(win, options) {
 			const secToMicro = n => n * 1000 * 1000;
 			const microToSec = n => n / 1000 / 1000;
 
-			const seekTo = t => win.webContents.send("seekTo", microToSec(t));
+			const seekTo = e => win.webContents.send("seekTo", microToSec(e.position));
 			const seek = o => win.webContents.send("seek", microToSec(o));
 
 			const mprisPlayer = setupMPRIS();
