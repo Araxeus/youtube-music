@@ -32,8 +32,8 @@ function registerShortcuts(win, options) {
 
 	if (is.linux()) {
 		try {
-			const secToMicro = n => Math.round(n * 1000 * 1000);
-			const microToSec = n => Math.round(n / 1000 / 1000);
+			const secToMicro = n => Math.round(Number(n) * 1000 * 1000);
+			const microToSec = n => Math.round(Number(n) / 1000 / 1000);
 
 			const seekTo = e => win.webContents.send("seekTo", microToSec(e.position));
 			const seek = o => win.webContents.send("seek", microToSec(o));
